@@ -1,7 +1,7 @@
 {
   "name": "report-service",
   "version": "1.0.0",
-  "description": "",
+  "description": "The internal report service from Interlogic B.V. ",
   "main": "index.js",
   "scripts": {
     "dev": "nodemon",
@@ -12,9 +12,12 @@
     "type": "git",
     "url": "git+https://github.com/interlogicbv/report-service.git"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "keywords": [
+    "mailer",
+    "mssql"
+  ],
+  "author": "R. van Rees",
+  "license": "MIT",
   "type": "commonjs",
   "bugs": {
     "url": "https://github.com/interlogicbv/report-service/issues"
