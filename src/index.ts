@@ -1,5 +1,5 @@
-import { run } from "./services/forwarding/performance";
+import { run as runForwardingReport } from "./services/forwarding/performance";
 
-run().catch((err) => {
+runForwardingReport().catch((err) => {
   console.error("Error:", err);
 });
