@@ -1,7 +1,7 @@
 import dotenv from "dotenv";
 dotenv.config();
 
-export const generateTemplate = (data: any) => {
+export const generateDailyTemplate = (data: any) => {
   const goal = Number(process.env.FORWARDING_DAILY_GOAL) || 7500;
   const result = Number(data.Result) || 0;
   const percentage = Math.max(0, Math.round((result / goal) * 100));

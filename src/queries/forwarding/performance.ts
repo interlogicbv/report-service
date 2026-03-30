@@ -1,6 +1,6 @@
 import { pool } from "../../db";
 
-export async function getData() {
+export async function getDailyData() {
   const db = await pool;
 
   const result = await db.request().query(`

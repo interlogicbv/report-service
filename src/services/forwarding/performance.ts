@@ -1,16 +1,15 @@
-import { getData } from "../../queries/forwarding/performance";
-import { generateTemplate } from "../../templates/forwarding/performance";
+import { getDailyData } from "../../queries/forwarding/performance";
+import { generateDailyTemplate } from "../../templates/forwarding/performance";
 import { sendMail } from "../../mail";
 
-export async function run() {
-  const data = await getData();
+export async function runDailyForwardingReport() {
+  const data = await getDailyData();
 
   if (!data.length) {
     console.log("No data found");
     return;
   }
 
-  await sendMail("Forwarding Performance Report", generateTemplate(data[0]));
-
-  console.log("Mail sent!");
+  await sendMail("Daily Forwarding Report", generateDailyTemplate(data[0]));
+  console.log("Daily Forwarding Report sent!");
 }
