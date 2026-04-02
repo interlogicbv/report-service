@@ -24,6 +24,16 @@ export const generateDailyTemplate = (
   const efficiency = Number(data.Efficiency) || 0;
   const blocks = Math.max(0, Math.min(Math.round((result / goal) * 10), 10));
 
+  console.table([
+    {
+      Income: data.Income,
+      Costs: data.Costs,
+      "Corrected Income": correctedIncome,
+      "Corrected Costs": correctedCosts,
+      Result: result,
+    },
+  ]);
+
   const incidentRows = incidents.length
     ? incidents
         .map(

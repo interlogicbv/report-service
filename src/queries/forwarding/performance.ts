@@ -11,7 +11,7 @@ export async function getDailyData(date: any) {
         SUM(TRIP.Income - TRIP.Costs) AS Result,
         CAST(SUM(TRIP.Income - TRIP.Costs) * 100.0 / NULLIF(SUM(TRIP.Income), 0) AS DECIMAL(10,2)) AS Efficiency
     FROM RP_Trip TRIP
-    WHERE TRIP.PlanStatus = 10 
+    WHERE TRIP.PlanStatus IN (10, 20)
         AND TRIP.Plangroup = 8 
         AND CAST(TRIP.CreationDate AS DATE) = @date
         AND TRIP.Costs IS NOT NULL;
@@ -26,7 +26,7 @@ export async function getDailyData(date: any) {
     FROM RP_Trip TRIP
     INNER JOIN RP_ResourceCombination RC 
         ON RC.Trip = TRIP.Tripnr
-    WHERE TRIP.PlanStatus = 10 
+    WHERE TRIP.PlanStatus IN (10, 20)
     AND TRIP.Plangroup = 8
     AND TRIP.Route IS NOT NULL
     AND CAST(TRIP.CreationDate AS DATE) = @date
