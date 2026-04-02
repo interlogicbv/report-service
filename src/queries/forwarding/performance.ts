@@ -1,11 +1,9 @@
 import { pool } from "../../db";
 
-export async function getDailyData() {
+export async function getDailyData(date: any) {
   const db = await pool;
 
-  const kpiResult = await db.request().query(`
-    DECLARE @Today DATE = GETDATE();
-
+  const kpiResult = await db.request().input("date", date).query(`
     SELECT 
         COUNT(*) AS Shipments, 
         SUM(TRIP.Income) AS Income, 
@@ -15,13 +13,11 @@ export async function getDailyData() {
     FROM RP_Trip TRIP
     WHERE TRIP.PlanStatus = 10 
         AND TRIP.Plangroup = 8 
-        AND CAST(TRIP.CreationDate AS DATE) = @Today
+        AND CAST(TRIP.CreationDate AS DATE) = @date
         AND TRIP.Costs IS NOT NULL;
   `);
 
-  const incidentsResult = await db.request().query(`
-    DECLARE @Today DATE = GETDATE();
-
+  const incidentsResult = await db.request().input("date", date).query(`
     SELECT 
         TRIP.Tripnr,
         TRIP.Route,
@@ -33,7 +29,7 @@ export async function getDailyData() {
     WHERE TRIP.PlanStatus = 10 
     AND TRIP.Plangroup = 8
     AND TRIP.Route IS NOT NULL
-    AND CAST(TRIP.CreationDate AS DATE) = @Today
+    AND CAST(TRIP.CreationDate AS DATE) = @date
     AND NOT EXISTS (
         SELECT 1
         FROM RP_CombinationCosts CC

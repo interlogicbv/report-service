@@ -1,7 +1,11 @@
 import dotenv from "dotenv";
 dotenv.config();
 
-export const generateDailyTemplate = (data: any, incidents: any[]) => {
+export const generateDailyTemplate = (
+  date: any,
+  data: any,
+  incidents: any[],
+) => {
   const incidentIncome = incidents.reduce(
     (sum, row) => sum + Number(row.Income || 0),
     0,
@@ -83,7 +87,7 @@ export const generateDailyTemplate = (data: any, incidents: any[]) => {
                   <td style="padding-top:10px;">
                     <h1 style="margin:0; font-size:20px; color:#001a2d;">Forwarding Update</h1>
                     <p style="margin:5px 0 0 0; font-size:13px; color:#666;">
-                      Data from ${new Date().toLocaleString("nl-NL")}
+                      Data from ${date}
                     </p>
                   </td>
                 </tr>
