@@ -3,13 +3,18 @@ import { generateDailyTemplate } from "../../templates/forwarding/performance";
 import { sendMail } from "../../mail";
 
 export async function runDailyForwardingReport() {
-  const data = await getDailyData();
+  const { kpi, incidents } = await getDailyData();
 
-  if (!data.length) {
+  if (!kpi) {
     console.log("No data found");
     return;
   }
 
-  await sendMail("Daily Forwarding Report", generateDailyTemplate(data[0]));
+  generateDailyTemplate(kpi, incidents);
+
+  await sendMail(
+    "Daily Forwarding Report",
+    generateDailyTemplate(kpi, incidents),
+  );
   console.log("Daily Forwarding Report sent!");
 }
