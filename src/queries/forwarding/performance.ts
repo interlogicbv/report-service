@@ -35,10 +35,10 @@ export async function getPerformanceData(date: any) {
             FROM RP_CombinationCosts CC
             WHERE CC.ResourceCombination = RC.ResourceCombinationnr
               AND CC.CostsKind = 1
-        )
-        OR TRIP.Income IS NULL
-        OR TRIP.Costs IS NULL
-    );
+          )
+          OR TRIP.Income IS NULL
+          OR TRIP.Costs IS NULL
+        );
   `);
 
   const tripResults = await db.request().input("date", date).query(`
@@ -50,9 +50,9 @@ export async function getPerformanceData(date: any) {
         (COALESCE(TRIP.Income, 0) - COALESCE(TRIP.Costs, 0)) AS Result
     FROM RP_Trip TRIP
     WHERE TRIP.PlanStatus IN (10, 20)
-    AND TRIP.Plangroup = 8
-    AND TRIP.Route IS NOT NULL
-    AND CAST(TRIP.CreationDate AS DATE) = @date
+      AND TRIP.Plangroup = 8
+      AND TRIP.Route IS NOT NULL
+      AND CAST(TRIP.CreationDate AS DATE) = @date
   `);
 
   return {

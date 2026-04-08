@@ -70,7 +70,9 @@ async function main() {
       console.log(`Running Forwarding Performance Report for ${parsed.date}`);
       await runPerformanceReport({ date: parsed.date });
     } else if (parsed.overview) {
-      console.log(`Running JOS for month ${parsed.month}`);
+      console.log(
+        `Running Forwarding Overview Report for month ${parsed.month}`,
+      );
       await runOverviewReport({ month: parsed.month });
     } else {
       console.log("Use -fp or -fo");
