@@ -4,7 +4,7 @@ DECLARE @date DATE = '2026-04-08';
 SELECT COUNT(*) AS Shipments,
        SUM(TRIP.Income) AS Income,
        SUM(TRIP.Costs) AS Costs,
-       SUM(COALESCE(TRIP.Income, 0) - COALESCE(TRIP.Costs, 0)) AS RESULT
+       SUM(COALESCE(TRIP.Income, 0) - COALESCE(TRIP.Costs, 0)) AS Result
 FROM RP_Trip TRIP
 WHERE TRIP.PlanStatus IN (10,
                           20)
@@ -36,7 +36,7 @@ SELECT TRIP.Tripnr,
        TRIP.Route,
        TRIP.Income,
        TRIP.Costs,
-       (COALESCE(TRIP.Income, 0) - COALESCE(TRIP.Costs, 0)) AS RESULT
+       (COALESCE(TRIP.Income, 0) - COALESCE(TRIP.Costs, 0)) AS Result
 FROM RP_Trip TRIP
 WHERE TRIP.PlanStatus IN (10,20)
   AND TRIP.Plangroup = 8

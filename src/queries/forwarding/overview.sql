@@ -15,7 +15,7 @@ SELECT PLANGROUP.Name AS Plangroup,
                                             WHEN COSTS.PurchaseInvoice IS NULL
                                                 OR INVOICE.InvoiceGroup = 1 THEN COSTS.AmountEx
                                             ELSE 0
-                                        END) AS RESULT
+                                        END) AS Result
 FROM RP_CombinationCosts COSTS
 INNER JOIN RM_Relation RELATION ON COSTS.Creditor = RELATION.Relationnr
 INNER JOIN RP_Trip TRIP ON COSTS.Trip = TRIP.Tripnr
