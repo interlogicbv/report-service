@@ -13,12 +13,35 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-export async function sendMail(subject: string, content: string) {
-  const recipients = process.env.FORWARDING_MAIL_TO?.split(",") || [];
+type MailOptions = {
+  subject: string;
+  html: string;
+  to?: string[];
+  attachments?: {
+    filename: string;
+    content: Buffer;
+    contentType?: string;
+  }[];
+};
+
+export async function sendMail({
+  subject,
+  html,
+  to,
+  attachments = [],
+}: MailOptions) {
+  const recipients =
+    to && to.length > 0 ? to : process.env.DEFAULT_MAIL?.split(",") || [];
+
+  if (recipients.length === 0) {
+    throw new Error("No recipients defined");
+  }
+
   await transporter.sendMail({
     from: process.env.SMTP_USER,
     to: recipients.join(", "),
-    subject: subject,
-    html: content,
+    subject,
+    html,
+    attachments,
   });
 }

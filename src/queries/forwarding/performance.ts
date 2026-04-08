@@ -1,6 +1,6 @@
 import { pool } from "../../db";
 
-export async function getDailyData(date: any) {
+export async function getPerformanceData(date: any) {
   const db = await pool;
 
   const kpiResult = await db.request().input("date", date).query(`

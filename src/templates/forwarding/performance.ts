@@ -1,7 +1,7 @@
 import dotenv from "dotenv";
 dotenv.config();
 
-export const generateDailyTemplate = (
+export const generatePerformanceTemplate = (
   date: any,
   data: any,
   incidents: any[],
@@ -19,7 +19,7 @@ export const generateDailyTemplate = (
   const correctedIncome = Number(data.Income || 0) - incidentIncome;
   const correctedCosts = Number(data.Costs || 0) - incidentCosts;
   const result = correctedIncome - correctedCosts;
-  const goal = Number(process.env.FORWARDING_DAILY_GOAL) || 7500;
+  const goal = Number(process.env.FORWARDING_PERFORMANCE_DAILY_GOAL) || 7500;
   const percentage = Math.max(0, Math.round((result / goal) * 100));
   const efficiency = Number(data.Efficiency) || 0;
   const blocks = Math.max(0, Math.min(Math.round((result / goal) * 10), 10));
@@ -95,7 +95,7 @@ export const generateDailyTemplate = (
                 </tr>
                 <tr>
                   <td style="padding-top:10px;">
-                    <h1 style="margin:0; font-size:20px; color:#001a2d;">Forwarding Update</h1>
+                    <h1 style="margin:0; font-size:20px; color:#001a2d;">Forwarding Performance Report</h1>
                     <p style="margin:5px 0 0 0; font-size:13px; color:#666;">
                       Data from ${date}
                     </p>

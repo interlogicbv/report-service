@@ -1,23 +1,27 @@
-import { getDailyData } from "../../queries/forwarding/performance";
-import { generateDailyTemplate } from "../../templates/forwarding/performance";
+import { getPerformanceData } from "../../queries/forwarding/performance";
+import { generatePerformanceTemplate } from "../../templates/forwarding/performance";
 import { sendMail } from "../../mail";
+import * as dotenv from "dotenv";
 
-const args = process.argv.slice(2);
-const dateArg = args.find((arg) => arg.startsWith("--date="));
-const inputDate = dateArg ? dateArg.split("=")[1] : null;
+dotenv.config();
 
-export async function runDailyForwardingReport() {
-  const date = inputDate || new Date().toISOString().split("T")[0];
-  const { kpi, incidents } = await getDailyData(date);
+type Props = {
+  date: string;
+};
+
+export async function runPerformanceReport({ date }: Props) {
+  const { kpi, incidents } = await getPerformanceData(date);
 
   if (!kpi) {
     console.log("No data found");
     return;
   }
 
-  await sendMail(
-    `Forwarding Daily Report - ${date}`,
-    generateDailyTemplate(date, kpi, incidents),
-  );
-  console.log("Daily Forwarding Report sent!");
+  await sendMail({
+    to: process.env.FORWARDING_PERFORMANCE_MAIL_TO?.split(","),
+    subject: `Forwarding Report - ${date}`,
+    html: generatePerformanceTemplate(date, kpi, incidents),
+  });
+
+  console.log("Forwarding Performance Report sent!");
 }
