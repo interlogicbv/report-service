@@ -21,18 +21,9 @@ export const generatePerformanceTemplate = (
   const result = correctedIncome - correctedCosts;
   const goal = Number(process.env.FORWARDING_PERFORMANCE_DAILY_GOAL) || 7500;
   const percentage = Math.max(0, Math.round((result / goal) * 100));
-  const efficiency = Number(data.Efficiency) || 0;
+  const efficiency =
+    ((correctedIncome - correctedCosts) / correctedIncome) * 100;
   const blocks = Math.max(0, Math.min(Math.round((result / goal) * 10), 10));
-
-  console.table([
-    {
-      Income: data.Income,
-      Costs: data.Costs,
-      "Corrected Income": correctedIncome,
-      "Corrected Costs": correctedCosts,
-      Result: result,
-    },
-  ]);
 
   const incidentRows = incidents.length
     ? incidents
@@ -166,7 +157,7 @@ export const generatePerformanceTemplate = (
               <h3 style="margin:0 0 10px 0; font-size:16px; color:#001a2d;">
                 Details
               </h3>
-      <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse; font-size:13px;">
+        <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse; font-size:13px;">
             
         <tr>
           <th style="text-align:left; padding:8px; border-bottom:2px solid #ddd;">
@@ -197,7 +188,7 @@ export const generatePerformanceTemplate = (
           </td>
 
           <td style="padding:8px; border-bottom:1px solid #eee; text-align:left; font-weight:bold;">
-            ${efficiency}%
+            ${efficiency.toFixed(2)}%
           </td>
         </tr>
 
