@@ -66,13 +66,13 @@ The service accepts command-line arguments to specify which report to run and op
 Run the daily forwarding performance report:
 
 ```bash
-npm start -fp
+npm start -- -fp
 ```
 
 Specify a custom date (YYYY-MM-DD):
 
 ```bash
-npm start -fp -date=2023-10-15
+npm start -- -fp -date=2023-10-15
 ```
 
 ### Forwarding Overview Report
@@ -80,13 +80,13 @@ npm start -fp -date=2023-10-15
 Run the monthly overview report:
 
 ```bash
-npm start -fo
+npm start -- -fo
 ```
 
 Specify a custom month (YYYY-MM):
 
 ```bash
-npm start -fo -month=2023-10
+npm start -- -fo -month=2023-10
 ```
 
 ### Development
