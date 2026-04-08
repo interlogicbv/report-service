@@ -38,8 +38,22 @@ export async function getPerformanceData(date: any) {
     );
   `);
 
+  const tripResults = await db.request().input("date", date).query(`
+    SELECT 
+        TRIP.Tripnr,
+        TRIP.Route,
+        TRIP.Income,
+        TRIP.Costs
+    FROM RP_Trip TRIP
+    WHERE TRIP.PlanStatus = 10 
+    AND TRIP.Plangroup = 8
+    AND TRIP.Route IS NOT NULL
+    AND CAST(TRIP.CreationDate AS DATE) = @date
+  `);
+
   return {
     kpi: kpiResult.recordset[0],
     incidents: incidentsResult.recordset,
+    rows: tripResults.recordset,
   };
 }
