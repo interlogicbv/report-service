@@ -1,141 +1,196 @@
 # Report Service
 
-The internal report service from Interlogic B.V. This service generates and emails daily forwarding performance reports and monthly overview reports based on data from an MSSQL database.
+Internal report service from Interlogic B.V.
+This service generates and sends automated reports and operational emails based on data from an MSSQL database.
+
+---
 
 ## Features
 
-- **Forwarding Performance Report**: Fetches forwarding performance data (shipments, income, costs, efficiency) for a specified date (defaults to today) and sends an HTML email report.
-- **Forwarding Overview Report**: Generates a monthly overview report with data exported to an Excel file, sent via email with the Excel attachment.
-- Generates HTML email templates for reports.
-- Sends reports via email using Nodemailer.
-- Supports command-line arguments for report type and date/month selection.
+### 📊 Forwarding Reports
+
+- **Forwarding Performance Report**
+  - Daily report with shipments, revenue, costs, and efficiency
+  - Sent as HTML email
+
+- **Forwarding Overview Report**
+  - Monthly overview
+  - Exported to Excel and sent as attachment
+
+### 📦 Customer / Operational
+
+- **Missing CMR Documents**
+  - Automatically detects shipments without received CMR documents
+  - Filters shipments older than 7 days
+  - Groups shipments per transporter (email)
+  - Sends one email per transporter with their shipments
+
+- **Customer Performance Report**
+  - Automatically inform the customer with the shipments we completed
+  - Weekly overview
+  - Exported to Excel and sent as attachment
+
+---
 
 ## Installation
 
-1. Clone the repository:
+```bash
+git clone https://github.com/interlogicbv/report-service.git
+cd report-service
+npm install
+```
 
-   ```bash
-   git clone https://github.com/interlogicbv/report-service.git
-   cd report-service
-   ```
+---
 
-2. Install dependencies:
+## Environment Variables
 
-   ```bash
-   npm install
-   ```
+Create a `.env` file:
 
-3. Set up environment variables (create a `.env` file):
-   - Database connection details (MSSQL):
-     - `DB_USER`: Database username
-     - `DB_PASSWORD`: Database password
-     - `DB_SERVER`: Database server address
-     - `DB_DATABASE`: Database name
-   - Email configuration (SMTP server, credentials):
-     - `SMTP_HOST`: SMTP server host
-     - `SMTP_PORT`: SMTP server port
-     - `SMTP_USER`: SMTP username
-     - `SMTP_PASS`: SMTP password
-     - `DEFAULT_MAIL`: Default email recipients for performance reports (comma-separated)
-   - For overview reports:
-     - `OVERVIEW_MAIL_TO`: Email recipients for overview reports (comma-separated)
+```
+DB_USER=
+DB_PASSWORD=
+DB_SERVER=
+DB_DATABASE=
 
-   Example `.env` file:
+SMTP_HOST=
+SMTP_PORT=587
+SMTP_USER=
+SMTP_PASS=
 
-   ```
-   DB_USER=myuser
-   DB_PASSWORD=mypassword
-   DB_SERVER=myserver
-   DB_DATABASE=mydatabase
+DEFAULT_MAIL=
 
-   SMTP_HOST=smtp.example.com
-   SMTP_PORT=587
-   SMTP_USER=myemail@example.com
-   SMTP_PASS=mypassword
+FORWARDING_PERFORMANCE_MAIL_TO=
+FORWARDING_PERFORMANCE_DAILY_GOAL=
 
-   DEFAULT_MAIL=recipient1@example.com,recipient2@example.com
-   OVERVIEW_MAIL_TO=overview@example.com,manager@example.com
-   ```
+FORWARDING_OVERVIEW_MAIL_TO=
+
+CUSTOMER_SHIPMENTS_MAIL_TO=
+```
+
+---
 
 ## Usage
 
-The service accepts command-line arguments to specify which report to run and optional date/month parameters.
-
-### Forwarding Performance Report
-
-Run the daily forwarding performance report:
+### 📊 Performance Report (daily)
 
 ```bash
 npm start -- -fp
 ```
 
-Specify a custom date (YYYY-MM-DD):
+Custom date:
 
 ```bash
-npm start -- -fp -date=2023-10-15
+npm start -- -fp -date=2026-04-10
 ```
 
-### Forwarding Overview Report
+---
 
-Run the monthly overview report:
+### 📈 Overview Report (monthly)
 
 ```bash
 npm start -- -fo
 ```
 
-Specify a custom month (YYYY-MM):
+Custom month:
 
 ```bash
-npm start -- -fo -month=2023-10
+npm start -- -fo -date=2026-04
 ```
 
-### Development
+---
+
+### 📦 Missing CMR Documents
+
+```bash
+npm start -- -papers
+```
+
+### 📈 Overview Report (weekly)
+
+```bash
+npm start -- -cp
+```
+
+Custom month:
+
+```bash
+npm start -- -cp -date=2026-14
+```
+
+---
+
+## Development
 
 ```bash
 npm run dev
 ```
 
-### Build
+---
+
+## Build
 
 ```bash
 npm run build
 ```
 
-### Production
+---
+
+## Production
 
 ```bash
 npm start
 ```
 
+---
+
 ## Project Structure
 
-- `src/index.ts`: Main entry point with argument parsing and validation
-- `src/db.ts`: Database connection setup
-- `src/mail.ts`: Email sending functionality
-- `src/utils/excel.ts`: Excel file generation utilities
-- `src/queries/forwarding/performance.ts`: Database query for forwarding performance data
-- `src/queries/forwarding/overview.ts`: Database query for overview data
-- `src/services/forwarding/performance.ts`: Service logic for performance report
-- `src/services/forwarding/overview.ts`: Service logic for overview report
-- `src/templates/forwarding/performance.ts`: HTML email template for performance report
-- `src/templates/forwarding/overview.ts`: HTML email template for overview report
+```
+src/
+├── db.ts
+├── mail.ts
+├── index.ts
+
+├── queries/
+│   ├── forwarding/
+│   └── customers/
+
+├── services/
+│   ├── forwarding/
+│   └── customers/
+
+├── templates/
+│   ├── forwarding/
+│   └── customers/
+
+├── utils/
+│   └── excel.ts
+```
+
+---
 
 ## Dependencies
 
-- `mssql`: For database connections
-- `nodemailer`: For sending emails
-- `exceljs`: For generating Excel files
-- `dotenv`: For environment variable management
-- `typescript`: For TypeScript compilation
+- `mssql`
+- `nodemailer`
+- `exceljs`
+- `dotenv`
+- `typescript`
+
+---
 
 ## License
 
 MIT License
 
+---
+
 ## Author
 
 R. van Rees
 
+---
+
 ## Repository
 
-[GitHub](https://github.com/interlogicbv/report-service)
+https://github.com/interlogicbv/report-service
