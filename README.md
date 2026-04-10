@@ -111,7 +111,7 @@ npm start -- -papers
 npm start -- -cp
 ```
 
-Custom month:
+Custom week:
 
 ```bash
 npm start -- -cp -date=2026-14
