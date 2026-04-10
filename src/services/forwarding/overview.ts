@@ -16,7 +16,7 @@ export async function runOverviewReport({ month }: { month: string }) {
   const excelBuffer = await generateOverviewExcel(rows);
 
   await sendMail({
-    to: process.env.OVERVIEW_MAIL_TO?.split(","),
+    to: process.env.FORWARDING_OVERVIEW_MAIL_TO?.split(","),
     subject: `Overview Report - ${month}`,
     html: generateOverviewTemplate(month, rows),
     attachments: [
