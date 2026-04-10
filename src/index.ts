@@ -1,5 +1,10 @@
+import { runShipmentsReport } from "./services/customers/shipments";
 import { runOverviewReport } from "./services/forwarding/overview";
 import { runPerformanceReport } from "./services/forwarding/performance";
+
+/* ======================
+   DATE HELPERS
+====================== */
 
 function getToday() {
   return new Date().toISOString().split("T")[0];
@@ -7,10 +12,31 @@ function getToday() {
 
 function getCurrentYearMonth() {
   const now = new Date();
-  const year = now.getFullYear();
-  const month = String(now.getMonth() + 1).padStart(2, "0");
-  return `${year}-${month}`;
+  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
 }
+
+function getCurrentYearWeek() {
+  const now = new Date();
+  return `${now.getFullYear()}-${String(getWeekNumber(now)).padStart(2, "0")}`;
+}
+
+function getWeekNumber(date: Date) {
+  const tempDate = new Date(
+    Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()),
+  );
+  const dayNum = tempDate.getUTCDay() || 7;
+  tempDate.setUTCDate(tempDate.getUTCDate() + 4 - dayNum);
+  const yearStart = new Date(Date.UTC(tempDate.getUTCFullYear(), 0, 1));
+  return Math.ceil(
+    ((tempDate.getTime() - yearStart.getTime()) / 86400000 + 1) / 7,
+  );
+}
+
+/* ======================
+   ARG PARSING
+====================== */
+
+type Mode = "performance" | "overview" | "customers";
 
 function parseArgs() {
   const args = process.argv.slice(2);
@@ -22,61 +48,100 @@ function parseArgs() {
     return arg ? arg.split("=")[1] : null;
   };
 
-  const rawDate = getParam("date");
-  const rawMonth = getParam("month");
-
-  return {
+  const modeFlags = {
     performance: getFlag("-fp"),
     overview: getFlag("-fo"),
-    date: rawDate || getToday(),
-    month: rawMonth || getCurrentYearMonth(),
-    rawDate,
-    rawMonth,
+    customers: getFlag("-cp"),
+  };
+
+  const activeModes = Object.entries(modeFlags).filter(([, v]) => v);
+
+  if (activeModes.length !== 1) {
+    throw new Error("Use exactly one of -fp, -fo or -cp");
+  }
+
+  const mode = activeModes[0][0] as Mode;
+
+  return {
+    mode,
+    rawDate: getParam("date"),
+    customer: getParam("customer"),
   };
 }
 
-function validateArgs({
-  performance,
-  overview,
-  rawDate,
-  rawMonth,
-  date,
-  month,
-}: any) {
-  if (performance && rawDate) {
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
-      throw new Error("Invalid date format. Use YYYY-MM-DD");
-    }
+/* ======================
+   DATE RESOLUTION
+====================== */
+
+function resolveDate(mode: Mode, rawDate?: string | null) {
+  if (!rawDate) {
+    if (mode === "performance") return getToday();
+    if (mode === "overview") return getCurrentYearMonth();
+    if (mode === "customers") return getCurrentYearWeek();
   }
 
-  if (overview && rawMonth) {
-    if (!/^\d{4}-\d{2}$/.test(month)) {
-      throw new Error("Invalid month format. Use YYYY-MM");
-    }
-  }
+  return rawDate!;
+}
 
-  if (performance && overview) {
-    throw new Error("Choose either -fp or -fo, not both");
+/* ======================
+   VALIDATION
+====================== */
+
+function validate(mode: Mode, date: string) {
+  const patterns = {
+    performance: /^\d{4}-\d{2}-\d{2}$/,
+    overview: /^\d{4}-\d{2}$/,
+    customers: /^\d{4}-\d{2}$/,
+  };
+
+  if (!patterns[mode].test(date)) {
+    const formats = {
+      performance: "YYYY-MM-DD",
+      overview: "YYYY-MM",
+      customers: "YYYY-WW",
+    };
+
+    throw new Error(`Invalid date format. Use ${formats[mode]}`);
   }
 }
 
+/* ======================
+   MAIN
+====================== */
+
 async function main() {
-  const parsed = parseArgs();
-
   try {
-    validateArgs(parsed);
+    const { mode, rawDate, customer } = parseArgs();
+    const date = resolveDate(mode, rawDate);
 
-    if (parsed.performance) {
-      console.log(`Running Forwarding Performance Report for ${parsed.date}`);
-      await runPerformanceReport({ date: parsed.date });
-    } else if (parsed.overview) {
+    validate(mode, date);
+
+    if (mode === "customers" && !customer) {
+      throw new Error("Missing required parameter: -customer=<number>");
+    }
+
+    if (mode === "performance") {
+      console.log(`Running Performance Report for ${date}`);
+      await runPerformanceReport({ date });
+    }
+
+    if (mode === "overview") {
+      console.log(`Running Overview Report for ${date}`);
+      await runOverviewReport({ month: date });
+    }
+
+    if (mode === "customers") {
+      const [year, week] = date.split("-").map(Number);
+
       console.log(
-        `Running Forwarding Overview Report for month ${parsed.month}`,
+        `Running Shipments Report for customer ${customer} in week ${date}`,
       );
-      await runOverviewReport({ month: parsed.month });
-    } else {
-      console.log("Use -fp or -fo");
-      process.exit(1);
+
+      await runShipmentsReport({
+        customer: Number(customer),
+        year,
+        week,
+      });
     }
 
     process.exit(0);

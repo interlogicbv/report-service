@@ -2,13 +2,6 @@ import dotenv from "dotenv";
 dotenv.config();
 
 export const generateOverviewTemplate = (month: any, rows: any[]) => {
-  console.table([
-    {
-      month: month,
-      shipments: rows.length,
-    },
-  ]);
-
   return `
       <div style="margin:0; padding:0; background-color:#ffffff;">
         <table width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:600px; margin:0 auto; border:1px solid #e0e0e0; border-top:5px solid #00b0bd; font-family: 'Segoe UI', Arial, sans-serif;">
