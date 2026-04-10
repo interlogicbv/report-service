@@ -40,6 +40,7 @@ WHERE LEG.CMRReceived IS NULL
     AND R.ID IS NULL
     AND LEG.Invoiced IS NULL
     AND LEG.LegStatus != 25
+    AND CP.EMail IS NOT NULL
     AND EA.Date < DATEADD(DAY, -7, CAST(GETDATE() AS DATE))
 ORDER BY BA.Date ASC;
   `);
