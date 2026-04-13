@@ -8,6 +8,7 @@ export async function getPapers() {
        PG.Name AS Plangroup,
        RM.Name AS Customer,
        LEG.Reference,
+       RC.Trip AS Trip,
        BA.Date AS LoadingDate,
        BA.Address_CountryCode AS LoadingCountry,
        BA.Address_ZIPcode AS LoadingZIP,

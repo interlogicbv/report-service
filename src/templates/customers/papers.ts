@@ -7,7 +7,7 @@ export const generatePapersTemplate = (rows: any[]) => {
       return `
       <tr>
         <td style="padding:8px; border-bottom:1px solid #eee;">
-          ${row.Reference || "-"}
+          ${row.Trip || "-"}
         </td>
         <td style="padding:8px; border-bottom:1px solid #eee;">
           ${row.LoadingCity || "-"}
@@ -61,7 +61,7 @@ export const generatePapersTemplate = (rows: any[]) => {
       <td style="padding:15px;">
         <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse; font-size:13px;">
           <tr>
-            <th style="text-align:left; padding:8px; border-bottom:2px solid #ddd;">Reference</th>
+            <th style="text-align:left; padding:8px; border-bottom:2px solid #ddd;">Trip</th>
             <th style="text-align:left; padding:8px; border-bottom:2px solid #ddd;">Loading</th>
             <th style="text-align:left; padding:8px; border-bottom:2px solid #ddd;">Unloading</th>
             <th style="text-align:left; padding:8px; border-bottom:2px solid #ddd;">Date</th>
