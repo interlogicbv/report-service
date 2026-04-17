@@ -1,160 +1,132 @@
-import { runShipmentsReport } from "./services/customers/shipments";
 import { runOverviewReport } from "./services/forwarding/overview";
 import { runPerformanceReport } from "./services/forwarding/performance";
-import { runMissingPapers } from "./services/customers/papers";
+import { runCarrierDocuments } from "./services/carrier/documents";
 
-/* ======================
-   DATE HELPERS
-====================== */
-
-function getToday() {
+/**
+ * Helpers
+ */
+function getToday(): string {
   return new Date().toISOString().split("T")[0];
 }
 
-function getCurrentYearMonth() {
+function getCurrentYearMonth(): string {
   const now = new Date();
   return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
 }
 
-function getCurrentYearWeek() {
-  const now = new Date();
-  return `${now.getFullYear()}-${String(getWeekNumber(now)).padStart(2, "0")}`;
+/**
+ * Types
+ */
+type ModeWithDate = {
+  flag: string;
+  description: string;
+  getDefaultDate: () => string;
+  validate: (date: string) => boolean;
+  format: string;
+  run: (date: string) => Promise<void>;
+  log: (date: string) => string;
+};
+
+type ModeWithoutDate = {
+  flag: string;
+  description: string;
+  run: () => Promise<void>;
+  log: () => string;
+};
+
+type ModeConfig = ModeWithDate | ModeWithoutDate;
+
+/**
+ * Type guard
+ */
+function isModeWithDate(config: ModeConfig): config is ModeWithDate {
+  return "getDefaultDate" in config;
 }
 
-function getWeekNumber(date: Date) {
-  const tempDate = new Date(
-    Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()),
-  );
-  const dayNum = tempDate.getUTCDay() || 7;
-  tempDate.setUTCDate(tempDate.getUTCDate() + 4 - dayNum);
-  const yearStart = new Date(Date.UTC(tempDate.getUTCFullYear(), 0, 1));
-  return Math.ceil(
-    ((tempDate.getTime() - yearStart.getTime()) / 86400000 + 1) / 7,
-  );
-}
+/**
+ * Mode configuration
+ */
+const MODES = {
+  forwardingPerformance: {
+    flag: "-fp",
+    description: "Run forwarding performance report",
+    getDefaultDate: getToday,
+    validate: (d: string) => /^\d{4}-\d{2}-\d{2}$/.test(d),
+    format: "YYYY-MM-DD",
+    run: async (date: string) => {
+      await runPerformanceReport({ date });
+    },
+    log: (date: string) => `Running Forwarding Performance Report for ${date}`,
+  },
 
-/* ======================
-   ARG PARSING
-====================== */
+  forwardingOverview: {
+    flag: "-fo",
+    description: "Run forwarding overview report",
+    getDefaultDate: getCurrentYearMonth,
+    validate: (d: string) => /^\d{4}-\d{2}$/.test(d),
+    format: "YYYY-MM",
+    run: async (date: string) => {
+      await runOverviewReport({ date });
+    },
+    log: (date: string) => `Running Forwarding Overview Report for ${date}`,
+  },
 
-type Mode = "performance" | "overview" | "customers" | "papers";
+  carrierDocuments: {
+    flag: "-cd",
+    description: "Run carrier documents job",
+    run: async () => {
+      await runCarrierDocuments();
+    },
+    log: () => "Running Carrier Documents job",
+  },
+} as const satisfies Record<string, ModeConfig>;
 
+type Mode = keyof typeof MODES;
+
+/**
+ * Argument parsing
+ */
 function parseArgs() {
   const args = process.argv.slice(2);
 
-  const getFlag = (flag: string) => args.includes(flag);
+  const selected = Object.entries(MODES).filter(([, config]) =>
+    args.includes(config.flag),
+  );
 
-  const getParam = (name: string) => {
-    const arg = args.find((a) => a.startsWith(`-${name}=`));
-    return arg ? arg.split("=")[1] : null;
-  };
-
-  const modeFlags = {
-    performance: getFlag("-fp"),
-    overview: getFlag("-fo"),
-    customers: getFlag("-cp"),
-    papers: getFlag("-papers"),
-  };
-
-  const activeModes = Object.entries(modeFlags).filter(([, v]) => v);
-
-  if (activeModes.length !== 1) {
-    throw new Error("Use exactly one of -fp, -fo, -cp or -papers");
+  if (selected.length !== 1) {
+    throw new Error(
+      `Use exactly one mode:\n${Object.values(MODES)
+        .map((m) => `  ${m.flag.padEnd(4)} ${m.description}`)
+        .join("\n")}`,
+    );
   }
 
-  const mode = activeModes[0][0] as Mode;
+  const [mode, config] = selected[0] as [Mode, ModeConfig];
 
-  return {
-    mode,
-    rawDate: getParam("date"),
-    customer: getParam("customer"),
-  };
+  const rawDate = args.find((a) => a.startsWith("-date="))?.split("=")[1];
+
+  return { mode, config, rawDate };
 }
 
-/* ======================
-   DATE RESOLUTION
-====================== */
-
-function resolveDate(mode: Mode, rawDate?: string | null) {
-  if (mode === "papers") return null;
-
-  if (!rawDate) {
-    if (mode === "performance") return getToday();
-    if (mode === "overview") return getCurrentYearMonth();
-    if (mode === "customers") return getCurrentYearWeek();
-  }
-
-  return rawDate!;
-}
-
-/* ======================
-   VALIDATION
-====================== */
-
-function validate(mode: Mode, date: string) {
-  const patterns = {
-    performance: /^\d{4}-\d{2}-\d{2}$/,
-    overview: /^\d{4}-\d{2}$/,
-    customers: /^\d{4}-\d{2}$/,
-    papers: /.*/,
-  };
-
-  if (!patterns[mode].test(date)) {
-    const formats = {
-      performance: "YYYY-MM-DD",
-      overview: "YYYY-MM",
-      customers: "YYYY-WW",
-      papers: "-",
-    };
-
-    throw new Error(`Invalid date format. Use ${formats[mode]}`);
-  }
-}
-
-/* ======================
-   MAIN
-====================== */
-
+/**
+ * Main
+ */
 async function main() {
   try {
-    const { mode, rawDate, customer } = parseArgs();
-    const date = resolveDate(mode, rawDate);
+    const { config, rawDate } = parseArgs();
 
-    if (mode !== "papers") {
-      validate(mode, date!);
-    }
+    if (isModeWithDate(config)) {
+      const date = rawDate ?? config.getDefaultDate();
 
-    if (mode === "customers" && !customer) {
-      throw new Error("Missing required parameter: -customer=<number>");
-    }
+      if (!config.validate(date)) {
+        throw new Error(`Invalid date format. Use ${config.format}`);
+      }
 
-    if (mode === "performance") {
-      console.log(`Running Performance Report for ${date}`);
-      await runPerformanceReport({ date: date! });
-    }
-
-    if (mode === "overview") {
-      console.log(`Running Overview Report for ${date}`);
-      await runOverviewReport({ month: date! });
-    }
-
-    if (mode === "customers") {
-      const [year, week] = date!.split("-").map(Number);
-
-      console.log(
-        `Running Shipments Report for customer ${customer} in week ${date}`,
-      );
-
-      await runShipmentsReport({
-        customer: Number(customer),
-        year,
-        week,
-      });
-    }
-
-    if (mode === "papers") {
-      console.log("Running Missing CMR Papers job");
-      await runMissingPapers();
+      console.log(config.log(date));
+      await config.run(date);
+    } else {
+      console.log(config.log());
+      await config.run();
     }
 
     process.exit(0);

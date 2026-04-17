@@ -1,7 +1,7 @@
-import { sendMail } from "../../mail";
 import * as dotenv from "dotenv";
-import { getPapers } from "../../queries/customers/papers";
-import { generatePapersTemplate } from "../../templates/customers/papers";
+import { getDocumentsData } from "../../queries/carrier/documents/helper";
+import { generatePapersMail } from "../../templates/carrier/documents";
+import { sendMail } from "../../utils/mail";
 dotenv.config();
 
 type Shipment = {
@@ -28,8 +28,8 @@ function groupByEmail(rows: Shipment[]) {
   );
 }
 
-export async function runMissingPapers() {
-  const { rows } = await getPapers();
+export async function runCarrierDocuments() {
+  const { rows } = await getDocumentsData();
 
   if (!rows.length) {
     console.log("No data found");
@@ -41,8 +41,8 @@ export async function runMissingPapers() {
   for (const [email, shipments] of Object.entries(grouped)) {
     await sendMail({
       to: [email],
-      subject: `Missing CMR Documents`,
-      html: generatePapersTemplate(shipments),
+      subject: `Missing Documents`,
+      html: generatePapersMail(shipments),
     });
 
     console.log(`Mail sent to ${email} (${shipments.length} shipments)`);

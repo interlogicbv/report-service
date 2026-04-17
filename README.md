@@ -1,36 +1,26 @@
 # Report Service
 
-Internal report service from Interlogic B.V.
-This service generates and sends automated reports and operational emails based on data from an MSSQL database.
-
----
+The internal report service designed for efficient data analysis and reporting.
 
 ## Features
 
-### 📊 Forwarding Reports
+### Forwarding Reports
 
 - **Forwarding Performance Report**
   - Daily report with shipments, revenue, costs, and efficiency
-  - Sent as HTML email
+  - Including Excel-sheet with shipment details
 
 - **Forwarding Overview Report**
   - Monthly overview
-  - Exported to Excel and sent as attachment
+  - Including Excel-sheet with shipment details
 
-### 📦 Customer / Operational
+### Carrier Reports
 
-- **Missing CMR Documents**
+- **Missing Documents**
   - Automatically detects shipments without received CMR documents
   - Filters shipments older than 7 days
   - Groups shipments per transporter (email)
   - Sends one email per transporter with their shipments
-
-- **Customer Performance Report**
-  - Automatically inform the customer with the shipments we completed
-  - Weekly overview
-  - Exported to Excel and sent as attachment
-
----
 
 ## Installation
 
@@ -40,38 +30,35 @@ cd report-service
 npm install
 ```
 
----
-
 ## Environment Variables
 
 Create a `.env` file:
 
 ```
+# Databse configuration
 DB_USER=
 DB_PASSWORD=
 DB_SERVER=
 DB_DATABASE=
 
+# SMTP configuration
 SMTP_HOST=
-SMTP_PORT=587
+SMTP_PORT=
 SMTP_USER=
 SMTP_PASS=
+SMTP_DEFAULT_MAIL_TO=
 
-DEFAULT_MAIL=
-
-FORWARDING_PERFORMANCE_MAIL_TO=
+# Forwarding performance report configuration
 FORWARDING_PERFORMANCE_DAILY_GOAL=
+FORWARDING_PERFORMANCE_MAIL_TO=
 
+# Forwarding overview report configuration
 FORWARDING_OVERVIEW_MAIL_TO=
-
-CUSTOMER_SHIPMENTS_MAIL_TO=
 ```
-
----
 
 ## Usage
 
-### 📊 Performance Report (daily)
+### Performance Report (daily)
 
 ```bash
 npm start -- -fp
@@ -80,44 +67,26 @@ npm start -- -fp
 Custom date:
 
 ```bash
-npm start -- -fp -date=2026-04-10
+npm start -- -fp -date=2026-04-01
 ```
 
----
-
-### 📈 Overview Report (monthly)
+### Overview Report (monthly)
 
 ```bash
 npm start -- -fo
 ```
 
-Custom month:
+Custom date:
 
 ```bash
 npm start -- -fo -date=2026-04
 ```
 
----
-
-### 📦 Missing CMR Documents
+### Missing Documents
 
 ```bash
-npm start -- -papers
+npm start -- -cd
 ```
-
-### 📈 Overview Report (weekly)
-
-```bash
-npm start -- -cp
-```
-
-Custom week:
-
-```bash
-npm start -- -cp -date=2026-14
-```
-
----
 
 ## Development
 
@@ -125,15 +94,11 @@ npm start -- -cp -date=2026-14
 npm run dev
 ```
 
----
-
 ## Build
 
 ```bash
 npm run build
 ```
-
----
 
 ## Production
 
@@ -141,33 +106,26 @@ npm run build
 npm start
 ```
 
----
-
 ## Project Structure
 
 ```
 src/
-├── db.ts
-├── mail.ts
 ├── index.ts
-
+├── excel/
+│   └── forwarding/
 ├── queries/
-│   ├── forwarding/
-│   └── customers/
-
+│   ├── carrier/
+│   └── forwarding/
 ├── services/
-│   ├── forwarding/
-│   └── customers/
-
+│   ├── carrier/
+│   └── forwarding/
 ├── templates/
-│   ├── forwarding/
-│   └── customers/
-
+│   ├── carrier/
+│   └── forwarding/
 ├── utils/
-│   └── excel.ts
+│   └── db.ts
+│   └── mail.ts
 ```
-
----
 
 ## Dependencies
 
@@ -177,19 +135,13 @@ src/
 - `dotenv`
 - `typescript`
 
----
-
 ## License
 
 MIT License
 
----
-
 ## Author
 
 R. van Rees
-
----
 
 ## Repository
 

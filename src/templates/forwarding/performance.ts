@@ -1,7 +1,7 @@
 import dotenv from "dotenv";
 dotenv.config();
 
-export const generatePerformanceTemplate = (
+export const generatePerformanceMail = (
   date: any,
   data: any,
   incidents: any[],
@@ -30,7 +30,7 @@ export const generatePerformanceTemplate = (
         .map(
           (row) => `
         <tr>
-          <td style="padding:8px; border-bottom:1px solid #eee;">${row.Tripnr}</td>
+          <td style="padding:8px; border-bottom:1px solid #eee;">${row.Trip}</td>
           <td style="padding:8px; border-bottom:1px solid #eee;">${row.Route}</td>
           <td style="padding:8px; border-bottom:1px solid #eee; text-align:left; color:#27ae60; font-weight:bold;">
             €${Number(row.Income).toLocaleString("nl-NL", { minimumFractionDigits: 2 })}
@@ -50,7 +50,6 @@ export const generatePerformanceTemplate = (
     </tr>
   `;
 
-  // kleur bepalen
   let statusColor = "#e74c3c"; // rood
   if (result >= goal)
     statusColor = "#27ae60"; // groen
@@ -58,7 +57,6 @@ export const generatePerformanceTemplate = (
     statusColor = "#f1c40f"; // geel
   else if (result >= goal * 0.5) statusColor = "#e67e22"; // oranje
 
-  // blokjes genereren
   const bar = Array.from({ length: 10 })
     .map(
       (_, i) => `
