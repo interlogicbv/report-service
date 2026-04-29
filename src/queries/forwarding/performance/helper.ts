@@ -33,7 +33,7 @@ export async function getPerformanceData(date: any) {
       AND TRIP.Plangroup = 8
       AND TRIP.Route IS NOT NULL
       AND CAST(TRIP.CreationDate AS DATE) = @date
-      AND (NOT EXISTS(SELECT 1 FROM RP_CombinationCosts CC WHERE CC.ResourceCombination = RC.ResourceCombinationnr AND (CC.CostsKind = 1 OR CC.CostsKind = 7)) OR TRIP.Income IS NULL OR TRIP.Costs IS NULL);
+      AND (NOT EXISTS(SELECT 1 FROM RP_CombinationCosts CC WHERE CC.ResourceCombination = RC.ResourceCombinationnr AND CC.CostsKind IN 1) OR TRIP.Income IS NULL OR TRIP.Costs IS NULL);
   `);
 
   const shipments = await db.request().input("date", date).query(`
