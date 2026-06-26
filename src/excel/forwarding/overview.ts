@@ -6,8 +6,9 @@ export async function generateOverviewFile(rows: any[]): Promise<Buffer> {
 
   sheet.columns = [
     { header: "Plangroup", key: "Plangroup", width: 20 },
+    { header: "Customer", key: "Customer", width: 50 },
     { header: "Trip", key: "Trip", width: 15 },
-    { header: "Relation", key: "Customer", width: 25 },
+    { header: "Carrier", key: "Carrier", width: 25 },
     { header: "Date", key: "LoadingDate", width: 20 },
     { header: "Income", key: "Income", width: 15 },
     { header: "Costs", key: "Costs", width: 15 },
@@ -23,8 +24,9 @@ export async function generateOverviewFile(rows: any[]): Promise<Buffer> {
   rows.forEach((row) => {
     sheet.addRow({
       Plangroup: row.Plangroup,
-      Trip: row.Trip,
       Customer: row.Customer,
+      Trip: row.Trip,
+      Carrier: row.Carrier,
       LoadingDate: row.LoadingDate,
       Income: row.Income,
       Costs: row.Costs,
