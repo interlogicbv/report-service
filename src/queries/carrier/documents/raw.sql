@@ -1,5 +1,5 @@
--- Shipments without documents
-SELECT 
+-- Shipments without documents (excluding Trucking plangroup)
+SELECT
     LEG.[Week],
     PG.Name AS Plangroup,
     RM.Name AS Customer,
@@ -17,7 +17,7 @@ SELECT
     EA.Address_Address1 AS UnloadingAddress,
     CR.Name AS Creditor,
     CP.EMail AS Email
-FROM 
+FROM
     SO_Leg LEG
     INNER JOIN SO_SalesOrder SO ON LEG.SalesOrder = SO.SalesOrdernr
     INNER JOIN RM_Relation RM ON SO.Customer = RM.Relationnr
@@ -34,11 +34,12 @@ FROM
         AND CP.EMail IS NOT NULL
         ORDER BY CP.Contactpersonnr
     ) CP
-WHERE 
+WHERE
     LEG.CMRReceived IS NULL
     AND R.ID IS NULL
     AND LEG.Invoiced IS NULL
     AND LEG.LegStatus != 25
+    AND PG.Name != 'Trucking'
     AND EA.Date < DATEADD(DAY, -7, CAST(GETDATE() AS DATE))
-ORDER BY 
+ORDER BY
     BA.Date ASC;

@@ -1,6 +1,6 @@
 {
   "name": "report-service",
-  "version": "2.1.0",
+  "version": "2.2.0",
   "description": "The internal report service from Interlogic B.V. ",
   "main": "index.js",
   "scripts": {
