@@ -31,7 +31,9 @@ export async function sendMail({
   attachments = [],
 }: MailOptions) {
   const recipients =
-    to && to.length > 0 ? to : process.env.DEFAULT_MAIL?.split(",") || [];
+    to && to.length > 0
+      ? to
+      : process.env.SMTP_DEFAULT_MAIL_TO?.split(",") || [];
 
   if (recipients.length === 0) {
     throw new Error("No recipients defined");

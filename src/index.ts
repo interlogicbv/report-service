@@ -1,5 +1,8 @@
-import { runOverviewReport } from "./services/forwarding/overview";
-import { runPerformanceReport } from "./services/forwarding/performance";
+import {
+  runMonthlyPerformanceReport,
+  runPerformanceReport,
+  runWeeklyPerformanceReport,
+} from "./services/forwarding/performance";
 import { runCarrierDocuments } from "./services/carrier/documents";
 
 /**
@@ -12,6 +15,20 @@ function getToday(): string {
 function getCurrentYearMonth(): string {
   const now = new Date();
   return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+}
+
+function getCurrentWeekStart(): string {
+  const now = new Date();
+  const day = now.getDay();
+  const daysSinceMonday = (day + 6) % 7;
+
+  now.setDate(now.getDate() - daysSinceMonday);
+
+  return [
+    now.getFullYear(),
+    String(now.getMonth() + 1).padStart(2, "0"),
+    String(now.getDate()).padStart(2, "0"),
+  ].join("-");
 }
 
 /**
@@ -59,16 +76,30 @@ const MODES = {
     log: (date: string) => `Running Forwarding Performance Report for ${date}`,
   },
 
-  forwardingOverview: {
-    flag: "-fo",
-    description: "Run forwarding overview report",
+  forwardingWeeklyPerformance: {
+    flag: "-fwp",
+    description: "Run forwarding weekly performance report",
+    getDefaultDate: getCurrentWeekStart,
+    validate: (d: string) => /^\d{4}-\d{2}-\d{2}$/.test(d),
+    format: "YYYY-MM-DD",
+    run: async (date: string) => {
+      await runWeeklyPerformanceReport({ date });
+    },
+    log: (date: string) =>
+      `Running Forwarding Weekly Performance Report for the week containing ${date}`,
+  },
+
+  forwardingMonthlyPerformance: {
+    flag: "-fmp",
+    description: "Run forwarding monthly performance report",
     getDefaultDate: getCurrentYearMonth,
     validate: (d: string) => /^\d{4}-\d{2}$/.test(d),
     format: "YYYY-MM",
     run: async (date: string) => {
-      await runOverviewReport({ date });
+      await runMonthlyPerformanceReport({ date });
     },
-    log: (date: string) => `Running Forwarding Overview Report for ${date}`,
+    log: (date: string) =>
+      `Running Forwarding Monthly Performance Report for ${date}`,
   },
 
   carrierDocuments: {

@@ -5,6 +5,21 @@ export const generatePerformanceMail = (
   date: any,
   data: any,
   incidents: any[],
+  options?: {
+    goal?: number;
+    title?: string;
+    dateLabel?: string;
+    comparison?: {
+      label: string;
+      result: number;
+    };
+    dailyBreakdown?: Array<{
+      date: string;
+      shipments: number;
+      result: number;
+      goal: number;
+    }>;
+  },
 ) => {
   const incidentIncome = incidents.reduce(
     (sum, row) => sum + Number(row.Income || 0),
@@ -19,11 +34,79 @@ export const generatePerformanceMail = (
   const correctedIncome = Number(data.Income || 0) - incidentIncome;
   const correctedCosts = Number(data.Costs || 0) - incidentCosts;
   const result = correctedIncome - correctedCosts;
-  const goal = Number(process.env.FORWARDING_PERFORMANCE_DAILY_GOAL) || 7500;
+  const configuredDailyGoal = Number(
+    process.env.FORWARDING_PERFORMANCE_DAILY_GOAL,
+  );
+  const goal =
+    options?.goal ??
+    (Number.isFinite(configuredDailyGoal) && configuredDailyGoal > 0
+      ? configuredDailyGoal
+      : 7500);
+  const title = options?.title ?? "Forwarding Performance Report";
+  const dateLabel = options?.dateLabel ?? `Data from ${date}`;
   const percentage = Math.max(0, Math.round((result / goal) * 100));
   const efficiency =
     ((correctedIncome - correctedCosts) / correctedIncome) * 100;
   const blocks = Math.max(0, Math.min(Math.round((result / goal) * 10), 10));
+  const comparisonDifference = options?.comparison
+    ? result - options.comparison.result
+    : 0;
+  const comparisonPercentage =
+    options?.comparison && options.comparison.result !== 0
+      ? (comparisonDifference / Math.abs(options.comparison.result)) * 100
+      : null;
+  const comparisonColor = comparisonDifference >= 0 ? "#27ae60" : "#e74c3c";
+  const comparisonBlock = options?.comparison
+    ? `
+      <tr>
+        <td style="padding:5px;">
+          <table width="100%" style="background:#f4f4f4; border-radius:5px;">
+            <tr>
+              <td style="padding:12px; text-align:center;">
+                <p style="font-size:11px; color:#888; margin:0; font-weight:bold;">COMPARISON</p>
+                <p style="font-size:18px; font-weight:bold; margin:5px 0 0; color:${comparisonColor};">
+                  ${comparisonDifference >= 0 ? "+" : ""}${comparisonDifference.toLocaleString("nl-NL", { style: "currency", currency: "EUR" })}
+                  ${comparisonPercentage === null ? "" : ` (${comparisonPercentage >= 0 ? "+" : ""}${comparisonPercentage.toFixed(1)}%)`}
+                </p>
+                <p style="font-size:11px; margin:5px 0 0; color:#666;">
+                  ${options.comparison.label}: ${options.comparison.result.toLocaleString("nl-NL", { style: "currency", currency: "EUR" })}
+                </p>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    `
+    : "";
+  const dailyBreakdownBlock = options?.dailyBreakdown?.length
+    ? `
+      <tr>
+        <td style="padding:15px;">
+          <h3 style="margin:0 0 10px 0; font-size:16px; color:#001a2d;">Daily breakdown</h3>
+          <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse; font-size:13px;">
+            <tr>
+              <th style="text-align:left; padding:8px; border-bottom:2px solid #ddd;">Date</th>
+              <th style="text-align:right; padding:8px; border-bottom:2px solid #ddd;">Shipments</th>
+              <th style="text-align:right; padding:8px; border-bottom:2px solid #ddd;">Result</th>
+              <th style="text-align:right; padding:8px; border-bottom:2px solid #ddd;">Goal</th>
+            </tr>
+            ${options.dailyBreakdown
+              .map(
+                (row) => `
+                  <tr>
+                    <td style="padding:8px; border-bottom:1px solid #eee;">${row.date}</td>
+                    <td style="padding:8px; border-bottom:1px solid #eee; text-align:right;">${row.shipments}</td>
+                    <td style="padding:8px; border-bottom:1px solid #eee; text-align:right; font-weight:bold; color:${row.result >= row.goal ? "#27ae60" : "#e74c3c"};">${row.result.toLocaleString("nl-NL", { style: "currency", currency: "EUR" })}</td>
+                    <td style="padding:8px; border-bottom:1px solid #eee; text-align:right;">${row.goal.toLocaleString("nl-NL", { style: "currency", currency: "EUR" })}</td>
+                  </tr>
+                `,
+              )
+              .join("")}
+          </table>
+        </td>
+      </tr>
+    `
+    : "";
 
   const incidentRows = incidents.length
     ? incidents
@@ -84,9 +167,9 @@ export const generatePerformanceMail = (
                 </tr>
                 <tr>
                   <td style="padding-top:10px;">
-                    <h1 style="margin:0; font-size:20px; color:#001a2d;">Forwarding Performance Report</h1>
+                    <h1 style="margin:0; font-size:20px; color:#001a2d;">${title}</h1>
                     <p style="margin:5px 0 0 0; font-size:13px; color:#666;">
-                      Data from ${date}
+                      ${dateLabel}
                     </p>
                   </td>
                 </tr>
@@ -145,6 +228,8 @@ export const generatePerformanceMail = (
                   </td>
                 </tr>
 
+                ${comparisonBlock}
+
               </table>
             </td>
           </tr>
@@ -196,6 +281,8 @@ export const generatePerformanceMail = (
         </td>
             </td>
           </tr>
+
+          ${dailyBreakdownBlock}
 
           <!-- INCIDENTS -->
           <tr>

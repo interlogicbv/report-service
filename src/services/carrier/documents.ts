@@ -1,15 +1,11 @@
-import * as dotenv from "dotenv";
 import { getDocumentsData } from "../../queries/carrier/documents/helper";
 import { generatePapersMail } from "../../templates/carrier/documents";
 import { sendMail } from "../../utils/mail";
-dotenv.config();
 
 type Shipment = {
   Email: string;
-  Reference: string;
   LoadingCity: string;
   UnloadingCity: string;
-  Date: string;
 };
 
 function groupByEmail(rows: Shipment[]) {
