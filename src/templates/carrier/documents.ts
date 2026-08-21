@@ -30,7 +30,7 @@ export const generatePapersMail = (rows: any[]) => {
         <!-- HEADER -->
         <tr>
           <td style="padding:15px; background-color:#f8f9fa;">
-            <img src="https://www.inter-logic.eu/wp-content/uploads/2023/10/Logo-Interlogic.png" width="120">
+            <img src="https://inter-logic.eu/images/logo_simple.png" width="120">
             <h1 style="margin:10px 0 0 0; font-size:20px; color:#001a2d;">
               Missing Documents
             </h1>

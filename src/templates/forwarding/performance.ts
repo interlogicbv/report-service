@@ -162,7 +162,7 @@ export const generatePerformanceMail = (
               <table width="100%">
                 <tr>
                   <td style="text-align:left;">
-                    <img src="https://www.inter-logic.eu/wp-content/uploads/2023/10/Logo-Interlogic.png" width="120" style="display:block;">
+                    <img src="https://inter-logic.eu/images/logo_simple.png" width="120" style="display:block;">
                   </td>
                 </tr>
                 <tr>
