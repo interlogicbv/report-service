@@ -2,8 +2,25 @@ import { pool } from "../../../utils/db";
 
 export async function getDocumentsData() {
   const db = await pool;
+  const excludedCreditors = [
+    ...new Set(
+      (process.env.CARRIER_DOCUMENTS_EXCLUDED_CREDITORS ?? "")
+        .split(";")
+        .map((name) => name.trim())
+        .filter(Boolean),
+    ),
+  ];
+  const request = db.request();
+  const excludedParameters = excludedCreditors.map((name, index) => {
+    const parameter = `excludedCreditor${index}`;
+    request.input(parameter, name);
+    return `@${parameter}`;
+  });
+  const creditorFilter = excludedParameters.length
+    ? `AND (CR.Name IS NULL OR CR.Name NOT IN (${excludedParameters.join(", ")}))`
+    : "";
 
-  const result = await db.request().query(`
+  const result = await request.query(`
     SELECT
         LEG.[Week],
         PG.Name AS Plangroup,
@@ -45,6 +62,7 @@ export async function getDocumentsData() {
         AND LEG.Invoiced IS NULL
         AND LEG.LegStatus != 25
         AND PG.Name != 'Trucking'
+        ${creditorFilter}
         AND EA.Date < DATEADD(DAY, -7, CAST(GETDATE() AS DATE))
     ORDER BY
         BA.Date ASC;

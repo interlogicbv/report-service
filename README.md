@@ -63,9 +63,20 @@ SMTP_DEFAULT_MAIL_TO=
 # Forwarding performance
 FORWARDING_PERFORMANCE_DAILY_GOAL=7500
 FORWARDING_PERFORMANCE_MAIL_TO=
+
+# Carrier documents: creditor names separated by semicolons
+CARRIER_DOCUMENTS_EXCLUDED_CREDITORS=
 ```
 
 `SMTP_DEFAULT_MAIL_TO` is only used when a job does not provide its own recipients. Multiple recipients can be separated with commas.
+
+To exclude creditors from the missing-documents query, set their full creditor names (`CR.Name`) in `.env`:
+
+```dotenv
+CARRIER_DOCUMENTS_EXCLUDED_CREDITORS="Creditor A;Creditor B;Creditor C"
+```
+
+Names are separated by semicolons; surrounding spaces and empty entries are ignored. Matching uses full names, with case sensitivity determined by the database collation. An empty or absent setting excludes no creditors. This applies only to the carrier documents job (`-cd`), and excluded shipments are omitted from carrier reminder emails.
 
 ## Commands
 
